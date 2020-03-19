@@ -1,3 +1,2 @@
-dataclasses
 typing_inspect
 toolz
