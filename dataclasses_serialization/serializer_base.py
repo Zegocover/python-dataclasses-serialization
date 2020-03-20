@@ -1,7 +1,6 @@
 from dataclasses import dataclass, fields, is_dataclass
 from functools import partial
 from typing import TypeVar, Union, Dict, List, get_type_hints
-
 from typing_inspect import is_union_type, get_origin, get_args
 
 from toolz import curry
@@ -61,7 +60,11 @@ def issubclass(cls, classinfo):
         return classinfo is Union and is_union_type(cls)
 
     if original_isinstance(classinfo, GenericMeta):
-        return original_isinstance(cls, GenericMeta) and classinfo.__args__ is None and get_origin(cls) is classinfo
+        return (
+            original_isinstance(cls, GenericMeta)
+            and classinfo.__args__ is None
+            and get_origin(cls) is classinfo
+        )
 
     if original_isinstance(cls, GenericMeta):
         origin = get_origin(cls)
@@ -129,10 +132,8 @@ def dict_to_dataclass(cls, dct, deserialization_func=noop_deserialization):
             if fld.name in dct
         })
     except TypeError:
-        raise DeserializationError("Missing one or more required fields to deserialize {!r} as {}".format(
-            dct,
-            cls
-        ))
+        raise DeserializationError(
+            "Missing one or more required fields to deserialize {!r} as {}".format(dct, cls))
 
 
 @curry
@@ -151,7 +152,9 @@ def union_deserialization(type_, obj, deserialization_func=noop_deserialization)
 
 
 @curry
-def dict_serialization(obj, key_serialization_func=noop_serialization, value_serialization_func=noop_serialization):
+def dict_serialization(
+    obj, key_serialization_func=noop_serialization, value_serialization_func=noop_serialization
+):
     if not isinstance(obj, dict):
         raise SerializationError("Cannot serialize {} {!r} using dict serialization".format(
             type(obj),
@@ -165,7 +168,10 @@ def dict_serialization(obj, key_serialization_func=noop_serialization, value_ser
 
 
 @curry
-def dict_deserialization(type_, obj, key_deserialization_func=noop_deserialization, value_deserialization_func=noop_deserialization):
+def dict_deserialization(
+    type_, obj, key_deserialization_func=noop_deserialization,
+    value_deserialization_func=noop_deserialization
+):
     if not isinstance(obj, dict):
         raise DeserializationError("Cannot deserialize {} {!r} using dict deserialization".format(
             type(obj),
@@ -208,10 +214,16 @@ class Serializer:
     deserialization_functions: dict
 
     def __post_init__(self):
-        self.serialization_functions.setdefault(dataclass, lambda obj: self.serialize(dict(obj.__dict__)))
+        self.serialization_functions.setdefault(
+            dataclass, lambda obj: self.serialize(dict(obj.__dict__))
+        )
 
-        self.deserialization_functions.setdefault(dataclass, dict_to_dataclass(deserialization_func=self.deserialize))
-        self.deserialization_functions.setdefault(Union, union_deserialization(deserialization_func=self.deserialize))
+        self.deserialization_functions.setdefault(
+            dataclass, dict_to_dataclass(deserialization_func=self.deserialize)
+        )
+        self.deserialization_functions.setdefault(
+            Union, union_deserialization(deserialization_func=self.deserialize)
+        )
 
     def serialize(self, obj):
         """

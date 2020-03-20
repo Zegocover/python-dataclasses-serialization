@@ -1,6 +1,9 @@
 from datetime import datetime
 
-from dataclasses_serialization.serializer_base import isinstance, noop_serialization, noop_deserialization, dict_serialization, dict_deserialization, list_deserialization, Serializer, DeserializationError
+from dataclasses_serialization.serializer_base import (
+    DeserializationError, Serializer, dict_deserialization, dict_serialization,
+    isinstance, list_deserialization, noop_deserialization, noop_serialization
+)
 
 try:
     import bson
@@ -54,13 +57,21 @@ def bson_int_deserializer(cls, obj):
 
 BSONSerializer = Serializer(
     serialization_functions={
-        dict: lambda dct: dict_serialization(dct, key_serialization_func=BSONSerializer.serialize, value_serialization_func=BSONSerializer.serialize),
+        dict: lambda dct: dict_serialization(
+            dct, key_serialization_func=BSONSerializer.serialize,
+            value_serialization_func=BSONSerializer.serialize
+        ),
         list: lambda lst: list(map(BSONSerializer.serialize, lst)),
         (str, int, float, datetime, bytes, bson.ObjectId, bool, type(None)): noop_serialization
     },
     deserialization_functions={
-        dict: lambda cls, dct: dict_deserialization(cls, dct, key_deserialization_func=BSONSerializer.deserialize, value_deserialization_func=BSONSerializer.deserialize),
-        list: lambda cls, lst: list_deserialization(cls, lst, deserialization_func=BSONSerializer.deserialize),
+        dict: lambda cls, dct: dict_deserialization(
+            cls, dct, key_deserialization_func=BSONSerializer.deserialize,
+            value_deserialization_func=BSONSerializer.deserialize
+        ),
+        list: lambda cls, lst: list_deserialization(
+            cls, lst, deserialization_func=BSONSerializer.deserialize
+        ),
         int: bson_int_deserializer,
         (str, float, datetime, bytes, bson.ObjectId, bool, type(None)): noop_deserialization
     }
