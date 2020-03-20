@@ -3,7 +3,7 @@ from os import path
 
 import re
 
-project_root = path.join(path.abspath(path.dirname(__file__)), '..')
+project_root = path.join(path.abspath(path.dirname(__file__)))
 
 
 def get_version():
@@ -25,7 +25,11 @@ setup(
     name='dataclasses_serialization',
     version=get_version(),
     packages=find_packages(include=('dataclasses_serialization', 'dataclasses_serialization.*')),
+    
     install_requires=get_requirements(),
+    extras_require={
+        ":python_version<'3.8'": ['dataclasses']
+    },
     setup_requires=['wheel'],
 
     author='Robert Wright',
@@ -39,8 +43,9 @@ setup(
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7'
+	'Programming Language :: Python :: 3.6'
+	'Programming Language :: Python :: 3.7'
+        'Programming Language :: Python :: 3.8'
     ],
     python_requires='>=3.6'
 )
